@@ -1,3 +1,4 @@
+// Package brainpool provides the (twisted) elliptic curves from rfc 5639
 package brainpool
 
 import (
