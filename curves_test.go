@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-// FIXME: find proper test vector
+// FIXME: find proper test vectors
 func TestECDSA(t *testing.T) {
 
 	var curves = []elliptic.Curve{
@@ -19,6 +19,14 @@ func TestECDSA(t *testing.T) {
 		brainpool.P320t1(),
 		brainpool.P384t1(),
 		brainpool.P512t1(),
+		// untwisted variants
+		brainpool.P160r1(),
+		brainpool.P192r1(),
+		brainpool.P224r1(),
+		brainpool.P256r1(),
+		brainpool.P320r1(),
+		brainpool.P384r1(),
+		brainpool.P512r1(),
 	}
 
 	var hash = []byte{
