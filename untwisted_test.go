@@ -18,8 +18,10 @@ var untwistedCurves = []elliptic.Curve{
 func TestTransformBasepoint(t *testing.T) {
 	for i, curve := range untwistedCurves {
 		curve := curve.(*bpcurve)
+		params := curve.Params()
 
-		tx, ty := curve.toTwisted(curve.gx, curve.gy)
+		gx, gy := params.Gx, params.Gy
+		tx, ty := curve.toTwisted(gx, gy)
 
 		if tx.Cmp(curve.twisted.Params().Gx) != 0 ||
 		   ty.Cmp(curve.twisted.Params().Gy) != 0 {
@@ -27,8 +29,8 @@ func TestTransformBasepoint(t *testing.T) {
 		}
 
 		xx, yy := curve.fromTwisted(tx, ty)
-		if curve.gx.Cmp(xx) != 0 ||
-		   curve.gy.Cmp(yy) != 0 {
+		if gx.Cmp(xx) != 0 ||
+		   gy.Cmp(yy) != 0 {
 			   t.Errorf("%d fromTwisted(toTwisted(x,y)) != x,y", i)
 		}
 	}
