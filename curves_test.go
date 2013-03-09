@@ -137,4 +137,65 @@ func TestScalarMult(t *testing.T) {
 	}
 }
 
+func benchAdd(curve elliptic.Curve, n int) {
+	x := curve.Params().Gx
+	y := curve.Params().Gy
+	for i := 0; i < n; i++ {
+		curve.Add(x, y, x, y)
+	}
+}
 
+func benchDouble(curve elliptic.Curve, n int) {
+	x := curve.Params().Gx
+	y := curve.Params().Gy
+	for i := 0; i < n; i++ {
+		curve.Double(x, y)
+	}
+}
+
+func benchScalarMult(curve elliptic.Curve, n int) {
+	x := curve.Params().Gx
+	y := curve.Params().Gy
+	k := curve.Params().N
+	k.Div(k, big.NewInt(2))
+	bk := k.Bytes()
+	for i := 0; i < n; i++ {
+		x, y = curve.ScalarMult(x, y, bk)
+	}
+}
+
+func BenchmarkAddT(b *testing.B) {
+	curve := brainpool.P256t1()
+	b.ResetTimer()
+	benchAdd(curve, b.N)
+}
+
+func BenchmarkDoubleT(b *testing.B) {
+	curve := brainpool.P256t1()
+	b.ResetTimer()
+	benchDouble(curve, b.N)
+}
+
+func BenchmarkScalarMultT(b *testing.B) {
+	curve := brainpool.P256t1()
+	b.ResetTimer()
+	benchScalarMult(curve, b.N)
+}
+
+func BenchmarkAddR(b *testing.B) {
+	curve := brainpool.P256r1()
+	b.ResetTimer()
+	benchAdd(curve, b.N)
+}
+
+func BenchmarkDoubleR(b *testing.B) {
+	curve := brainpool.P256r1()
+	b.ResetTimer()
+	benchDouble(curve, b.N)
+}
+
+func BenchmarkScalarMultR(b *testing.B) {
+	curve := brainpool.P256r1()
+	b.ResetTimer()
+	benchScalarMult(curve, b.N)
+}
