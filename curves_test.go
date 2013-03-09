@@ -153,14 +153,11 @@ func benchDouble(curve elliptic.Curve, n int) {
 	}
 }
 
-func benchScalarMult(curve elliptic.Curve, n int) {
+func benchScalarMult(curve elliptic.Curve, k []byte, n int) {
 	x := curve.Params().Gx
 	y := curve.Params().Gy
-	k := curve.Params().N
-	k.Div(k, big.NewInt(2))
-	bk := k.Bytes()
 	for i := 0; i < n; i++ {
-		x, y = curve.ScalarMult(x, y, bk)
+		curve.ScalarMult(x, y, k)
 	}
 }
 
@@ -178,8 +175,9 @@ func BenchmarkDoubleT(b *testing.B) {
 
 func BenchmarkScalarMultT(b *testing.B) {
 	curve := brainpool.P256t1()
+	k := new(big.Int).Div(curve.Params().N, big.NewInt(2)).Bytes()
 	b.ResetTimer()
-	benchScalarMult(curve, b.N)
+	benchScalarMult(curve, k, b.N)
 }
 
 func BenchmarkAddR(b *testing.B) {
@@ -196,6 +194,7 @@ func BenchmarkDoubleR(b *testing.B) {
 
 func BenchmarkScalarMultR(b *testing.B) {
 	curve := brainpool.P256r1()
+	k := new(big.Int).Div(curve.Params().N, big.NewInt(2)).Bytes()
 	b.ResetTimer()
-	benchScalarMult(curve, b.N)
+	benchScalarMult(curve, k, b.N)
 }
