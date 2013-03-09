@@ -10,6 +10,10 @@ type rcurve struct {
 	params  elliptic.CurveParams
 	z       *big.Int
 	zinv    *big.Int
+	z2	*big.Int
+	z3	*big.Int
+	zinv2	*big.Int
+	zinv3	*big.Int
 }
 
 func newrcurve(twisted elliptic.Curve, gx, gy, z *big.Int) *rcurve {
@@ -20,34 +24,36 @@ func newrcurve(twisted elliptic.Curve, gx, gy, z *big.Int) *rcurve {
 	curve.params.B = nil // FIXME: crypto/elliptic assumes A=-3
 	curve.params.Gx = gx
 	curve.params.Gy = gy
+
+	two := big.NewInt(2)
+	three := big.NewInt(3)
+
 	curve.z = z
 	curve.zinv = new(big.Int).ModInverse(z, curve.params.P)
+	curve.z2 = new(big.Int).Exp(curve.z, two, curve.params.P)
+	curve.z3 = new(big.Int).Exp(curve.z, three, curve.params.P)
+	curve.zinv2 = new(big.Int).Exp(curve.zinv, two, curve.params.P)
+	curve.zinv3 = new(big.Int).Exp(curve.zinv, three, curve.params.P)
 
 	return &curve
 }
 
-func (curve *rcurve) transform(x, y, z *big.Int) (*big.Int, *big.Int) {
-	p := curve.params.P
-
-	zz := new(big.Int).Mul(z, z)
-	zz.Mod(zz, p)
-	tx := new(big.Int).Mul(x, zz)
-	tx.Mod(tx, p)
-
-	zz.Mul(zz, z)
-	zz.Mod(zz, p)
-	ty := new(big.Int).Mul(y, zz)
-	ty.Mod(ty, p)
-
-	return tx, ty
-}
-
 func (curve *rcurve) toTwisted(x, y *big.Int) (*big.Int, *big.Int) {
-	return curve.transform(x, y, curve.z)
+	var tx, ty big.Int
+	tx.Mul(x, curve.z2)
+	tx.Mod(&tx, curve.params.P)
+	ty.Mul(y, curve.z3)
+	ty.Mod(&ty, curve.params.P)
+	return &tx, &ty
 }
 
-func (curve *rcurve) fromTwisted(x, y *big.Int) (*big.Int, *big.Int) {
-	return curve.transform(x, y, curve.zinv)
+func (curve *rcurve) fromTwisted(tx, ty *big.Int) (*big.Int, *big.Int) {
+	var x, y big.Int
+	x.Mul(tx, curve.zinv2)
+	x.Mod(&x, curve.params.P)
+	y.Mul(ty, curve.zinv3)
+	y.Mod(&y, curve.params.P)
+	return &x, &y
 }
 
 func (curve *rcurve) Params() *elliptic.CurveParams {
