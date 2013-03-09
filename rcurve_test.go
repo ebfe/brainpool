@@ -36,24 +36,13 @@ func TestTransformBasepoint(t *testing.T) {
 	}
 }
 
-func BenchmarkTransformToTwisted(b *testing.B) {
+func BenchmarkTransform(b *testing.B) {
 	curve := P256r1().(*rcurve)
 	x := curve.params.Gx
 	y := curve.params.Gy
-
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		curve.toTwisted(x, y)
 	}
 }
 
-func BenchmarkTransformFromTwisted(b *testing.B) {
-	curve := P256r1().(*rcurve)
-	x := curve.params.Gx
-	y := curve.params.Gy
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		curve.fromTwisted(x, y)
-	}
-}

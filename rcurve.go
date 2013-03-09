@@ -26,38 +26,28 @@ func newrcurve(twisted elliptic.Curve, gx, gy, z *big.Int) *rcurve {
 	return &curve
 }
 
-func (curve *rcurve) toTwisted(x, y *big.Int) (*big.Int, *big.Int) {
-	p := curve.twisted.Params().P
+func (curve *rcurve) transform(x, y, z *big.Int) (*big.Int, *big.Int) {
+	p := curve.params.P
 
-	two := big.NewInt(2)
-	three := big.NewInt(3)
-
-	t := new(big.Int).Exp(curve.z, two, p)
-	tx := new(big.Int).Mul(x, t)
+	zz := new(big.Int).Mul(z, z)
+	zz.Mod(zz, p)
+	tx := new(big.Int).Mul(x, zz)
 	tx.Mod(tx, p)
 
-	t.Exp(curve.z, three, p)
-	ty := new(big.Int).Mul(y, t)
+	zz.Mul(zz, z)
+	zz.Mod(zz, p)
+	ty := new(big.Int).Mul(y, zz)
 	ty.Mod(ty, p)
 
 	return tx, ty
 }
 
+func (curve *rcurve) toTwisted(x, y *big.Int) (*big.Int, *big.Int) {
+	return curve.transform(x, y, curve.z)
+}
+
 func (curve *rcurve) fromTwisted(x, y *big.Int) (*big.Int, *big.Int) {
-	p := curve.twisted.Params().P
-
-	two := big.NewInt(2)
-	three := big.NewInt(3)
-
-	t := new(big.Int).Exp(curve.zinv, two, p)
-	tx := new(big.Int).Mul(x, t)
-	tx.Mod(tx, p)
-
-	t.Exp(curve.zinv, three, p)
-	ty := new(big.Int).Mul(y, t)
-	ty.Mod(ty, p)
-
-	return tx, ty
+	return curve.transform(x, y, curve.zinv)
 }
 
 func (curve *rcurve) Params() *elliptic.CurveParams {
