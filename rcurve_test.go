@@ -17,7 +17,7 @@ var untwistedCurves = []elliptic.Curve{
 
 func TestTransformBasepoint(t *testing.T) {
 	for i, curve := range untwistedCurves {
-		curve := curve.(*bpcurve)
+		curve := curve.(*rcurve)
 		params := curve.Params()
 
 		gx, gy := params.Gx, params.Gy
